@@ -5,6 +5,7 @@ const { pingDB } = require("./db");
 
 const healthRoutes = require("./routes/health.routes");
 const authRoutes = require("./routes/auth.routes"); // <-- Adicionado aqui
+const reservationRoutes = require("./routes/reservation.routes");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 // Rotas
 app.use("/health", healthRoutes);
 app.use("/api/auth", authRoutes); 
+app.use("/api", reservationRoutes);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, async () => {

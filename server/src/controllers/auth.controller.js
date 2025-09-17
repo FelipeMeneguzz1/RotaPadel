@@ -284,4 +284,3 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({ message: "Erro interno", error: err.message });
   }
 };
-
