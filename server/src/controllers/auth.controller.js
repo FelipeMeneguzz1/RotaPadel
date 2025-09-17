@@ -171,3 +171,117 @@ exports.login = async (req, res) => {
     return res.status(500).json({ message: "Erro interno", error: err.message });
   }
 };
+
+//Esqueci minha senha
+const { sendRecoveryCode } = require("../utils/email");
+
+function generateCode(length = 6) {
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += Math.floor(Math.random() * 10);
+  }
+  return code;
+}
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "email é obrigatório" });
+
+    const emailNormalized = String(email).trim().toLowerCase();
+
+    // Verificar se usuário existe
+    const users = await sql`
+      SELECT id, email
+      FROM users
+      WHERE email = ${emailNormalized}
+      LIMIT 1
+    `;
+    if (users.length === 0) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    const user = users[0];
+    const code = generateCode(6);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+
+    // Inserir no banco
+    await sql`
+      INSERT INTO password_resets (user_id, code, expires_at)
+      VALUES (${user.id}, ${code}, ${expiresAt})
+    `;
+
+    // Enviar e-mail
+    await sendRecoveryCode(user.email, code);
+
+    return res.json({ message: "Código de recuperação enviado por e-mail" });
+  } catch (err) {
+    console.error("forgotPassword error:", err);
+    return res.status(500).json({ message: "Erro interno", error: err.message });
+  }
+};
+
+//Reset de senha
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword, confirmPassword } = req.body;
+    if (!email || !code || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "Todos os campos são obrigatórios" });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Senhas não coincidem" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "Senha deve ter ao menos 6 caracteres" });
+    }
+
+    const emailNormalized = String(email).trim().toLowerCase();
+
+    // Buscar usuário
+    const users = await sql`
+      SELECT id
+      FROM users
+      WHERE email = ${emailNormalized}
+      LIMIT 1
+    `;
+    if (users.length === 0) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    const user = users[0];
+
+    // Verificar código
+    const codes = await sql`
+      SELECT id, expires_at, used
+      FROM password_resets
+      WHERE user_id = ${user.id} AND code = ${code} AND used = false
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    if (codes.length === 0) return res.status(400).json({ message: "Código inválido ou já usado" });
+
+    const reset = codes[0];
+    if (new Date(reset.expires_at) < new Date()) {
+      return res.status(400).json({ message: "Código expirado" });
+    }
+
+    // Atualizar senha
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await sql`
+      UPDATE users
+      SET password_hash = ${passwordHash}
+      WHERE id = ${user.id}
+    `;
+
+    // Marcar código como usado
+    await sql`
+      UPDATE password_resets
+      SET used = true
+      WHERE id = ${reset.id}
+    `;
+
+    return res.json({ message: "Senha redefinida com sucesso" });
+  } catch (err) {
+    console.error("resetPassword error:", err);
+    return res.status(500).json({ message: "Erro interno", error: err.message });
+  }
+};
+
