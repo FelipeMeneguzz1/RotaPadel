@@ -13,23 +13,22 @@ import {
 	FormSubtitle,
 	Form,
 	FormGroup,
-	ForgotPassword,
-	SignUpLink,
+	SignInLink,
 	ErrorMessage,
 	ImageContainer,
 	PlayerImage,
 	BeAProText,
 } from "./styles";
 
-export function Login() {
+export function ForgotPassword() {
 	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		email: "",
-		password: "",
 	});
 	const [errors, setErrors] = useState({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [apiError, setApiError] = useState("");
+	const [successMessage, setSuccessMessage] = useState("");
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
@@ -47,6 +46,9 @@ export function Login() {
 		if (apiError) {
 			setApiError("");
 		}
+		if (successMessage) {
+			setSuccessMessage("");
+		}
 	};
 
 	const validateForm = () => {
@@ -56,12 +58,6 @@ export function Login() {
 			newErrors.email = "Email é obrigatório";
 		} else if (!/\S+@\S+\.\S+/.test(formData.email)) {
 			newErrors.email = "Email inválido";
-		}
-
-		if (!formData.password) {
-			newErrors.password = "Senha é obrigatória";
-		} else if (formData.password.length < 6) {
-			newErrors.password = "Senha deve ter pelo menos 6 caracteres";
 		}
 
 		setErrors(newErrors);
@@ -77,16 +73,20 @@ export function Login() {
 
 		setIsLoading(true);
 		setApiError("");
+		setSuccessMessage("");
 		
 		try {
-			const response = await authService.login(formData.email, formData.password);
-			console.log("Login realizado com sucesso:", response);
+			const response = await authService.forgotPassword(formData.email);
+			console.log("Código enviado com sucesso:", response);
+			setSuccessMessage("Código de recuperação enviado por e-mail!");
 			
-			// Redirecionar para a página inicial após login bem-sucedido
-			navigate("/");
+			// Redirecionar para a página de redefinir senha após 2 segundos
+			setTimeout(() => {
+				navigate("/reset-password", { state: { email: formData.email } });
+			}, 2000);
 		} catch (error) {
-			console.error("Erro no login:", error);
-			setApiError(error.message || "Erro ao fazer login. Tente novamente.");
+			console.error("Erro ao enviar código:", error);
+			setApiError(error.message || "Erro ao enviar código de recuperação. Tente novamente.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -97,15 +97,23 @@ export function Login() {
 			<Header />
 			<FormContainer>
 				<ModalContainer>
-					<FormTitle>LOGIN</FormTitle>
+					<FormTitle>RECUPERAR SENHA</FormTitle>
 					<FormSubtitle>
-						Entre com sua conta para continuar
+						Digite seu email para receber o código de recuperação
 					</FormSubtitle>
 					
 					<Form onSubmit={handleSubmit}>
 						{apiError && (
 							<FormGroup>
 								<ErrorMessage>{apiError}</ErrorMessage>
+							</FormGroup>
+						)}
+						
+						{successMessage && (
+							<FormGroup>
+								<div style={{ color: "#28a745", fontSize: "0.9rem", textAlign: "center" }}>
+									{successMessage}
+								</div>
 							</FormGroup>
 						)}
 						
@@ -121,32 +129,16 @@ export function Login() {
 							{errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
 						</FormGroup>
 
-						<FormGroup>
-							<FormInput
-								type="password"
-								name="password"
-								placeholder="Digite sua senha"
-								value={formData.password}
-								onChange={handleInputChange}
-								error={errors.password}
-							/>
-							{errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
-						</FormGroup>
-
-						<ForgotPassword>
-							<Link href="/forgot-password">Esqueci minha senha</Link>
-						</ForgotPassword>
-
 						<Button 
 							type="submit" 
 							disabled={isLoading}
 						>
-							{isLoading ? "Entrando..." : "ENTRAR"}
+							{isLoading ? "Enviando..." : "ENVIAR CÓDIGO"}
 						</Button>
 
-						<SignUpLink>
-							Não tem uma conta? <Link href="/register">Cadastre-se</Link>
-						</SignUpLink>
+						<SignInLink>
+							Lembrou da senha? <Link href="/login">Voltar ao login</Link>
+						</SignInLink>
 					</Form>
 				</ModalContainer>
 

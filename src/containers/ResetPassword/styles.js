@@ -68,12 +68,7 @@ export const FormGroup = styled.div`
 	gap: 8px;
 `;
 
-export const ForgotPassword = styled.div`
-	text-align: right;
-	margin-top: -10px;
-`;
-
-export const SignUpLink = styled.div`
+export const SignInLink = styled.div`
 	text-align: center;
 	margin-top: 20px;
 	font-size: 0.9rem;
