@@ -12,6 +12,16 @@ export const Container = styled.div`
     width: 100%;
 `;
 
+export const ContainerTop = styled.div`
+  margin-bottom: 40px;
+`;
+
+export const ContainerBottom = styled.div`
+ display: flex;
+ align-items: center;
+ justify-content: center;
+`;
+
 export const BannerWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -23,8 +33,7 @@ export const BannerWrapper = styled.div`
   align-items: center;
   color: #fff;
   padding: 2rem;
-  max-width: 1300px;
-  margin-left: 307px;
+  max-width: 1270px;
   border-radius: 25px;
 `;
 

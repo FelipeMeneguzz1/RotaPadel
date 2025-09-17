@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "../../components/Header";
-import { FormInput } from "../../components/FormInput";
 import { Button } from "../../components/Button";
+import { FormInput } from "../../components/FormInput";
+import { Header } from "../../components/Header";
 import { Link } from "../../components/Link";
 import authService from "../../services/authService";
 import {
-	Container,
-	FormContainer,
-	ModalContainer,
-	FormTitle,
-	FormSubtitle,
-	Form,
-	FormGroup,
-	ForgotPassword,
-	SignUpLink,
-	ErrorMessage,
-	ImageContainer,
-	PlayerImage,
 	BeAProText,
+	Container,
+	ErrorMessage,
+	ForgotPassword,
+	Form,
+	FormContainer,
+	FormGroup,
+	FormSubtitle,
+	FormTitle,
+	ImageContainer,
+	ModalContainer,
+	PlayerImage,
+	SignUpLink,
 } from "./styles";
 
 export function Login() {
@@ -33,13 +33,13 @@ export function Login() {
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			[name]: value,
 		}));
 		// Limpar erros quando usuário começar a digitar
 		if (errors[name]) {
-			setErrors(prev => ({
+			setErrors((prev) => ({
 				...prev,
 				[name]: "",
 			}));
@@ -70,18 +70,21 @@ export function Login() {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		
+
 		if (!validateForm()) {
 			return;
 		}
 
 		setIsLoading(true);
 		setApiError("");
-		
+
 		try {
-			const response = await authService.login(formData.email, formData.password);
+			const response = await authService.login(
+				formData.email,
+				formData.password,
+			);
 			console.log("Login realizado com sucesso:", response);
-			
+
 			// Redirecionar para a página inicial após login bem-sucedido
 			navigate("/");
 		} catch (error) {
@@ -98,17 +101,15 @@ export function Login() {
 			<FormContainer>
 				<ModalContainer>
 					<FormTitle>LOGIN</FormTitle>
-					<FormSubtitle>
-						Entre com sua conta para continuar
-					</FormSubtitle>
-					
+					<FormSubtitle>Entre com sua conta para continuar</FormSubtitle>
+
 					<Form onSubmit={handleSubmit}>
 						{apiError && (
 							<FormGroup>
 								<ErrorMessage>{apiError}</ErrorMessage>
 							</FormGroup>
 						)}
-						
+
 						<FormGroup>
 							<FormInput
 								type="email"
@@ -130,17 +131,16 @@ export function Login() {
 								onChange={handleInputChange}
 								error={errors.password}
 							/>
-							{errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
+							{errors.password && (
+								<ErrorMessage>{errors.password}</ErrorMessage>
+							)}
 						</FormGroup>
 
 						<ForgotPassword>
 							<Link href="/forgot-password">Esqueci minha senha</Link>
 						</ForgotPassword>
 
-						<Button 
-							type="submit" 
-							disabled={isLoading}
-						>
+						<Button type="submit" disabled={isLoading}>
 							{isLoading ? "Entrando..." : "ENTRAR"}
 						</Button>
 
@@ -151,13 +151,11 @@ export function Login() {
 				</ModalContainer>
 
 				<ImageContainer>
-					<PlayerImage 
-						src="/src/assets/jogadorTelaLoginRegister.png" 
-						alt="Jogador de Padel" 
+					<PlayerImage
+						src="/src/assets/jogadorTelaLoginRegister.png"
+						alt="Jogador de Padel"
 					/>
-					<BeAProText>
-						BE A<br />PRO
-					</BeAProText>
+					<BeAProText>BE A PRO</BeAProText>
 				</ImageContainer>
 			</FormContainer>
 		</Container>

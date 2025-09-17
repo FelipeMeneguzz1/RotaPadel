@@ -15,7 +15,7 @@ export const Logo = styled.h1`
   font-style: italic;
   font-weight: 700;
   line-height: normal;
-  cursor: default;
+  cursor: pointer;
 `;
 
 export const NavButtons = styled.div`

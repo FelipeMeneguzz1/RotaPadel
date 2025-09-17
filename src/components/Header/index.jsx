@@ -17,14 +17,18 @@ export function Header() {
 	const handleNaviLogin = () => {
 		navigate("/login");
 	};
+
+	const handleNaviHome = () => {
+		navigate("/");
+	};
 	return (
 		<HeaderContainer>
-			<Logo>ROTA PADEL</Logo>
+			<Logo onClick={handleNaviHome}>ROTA PADEL</Logo>
 			<NavButtons>
 				<ScheduleButton onClick={handleNavigate}>
 					AGENDE UM HORÁRIO
 				</ScheduleButton>
-				<LoginButton onClick={handleNaviLogin}>LOGIN</LoginButton>
+				<LoginButton onClick={handleNaviLogin}>ENTRAR</LoginButton>
 			</NavButtons>
 		</HeaderContainer>
 	);

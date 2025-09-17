@@ -88,11 +88,11 @@ export const ErrorMessage = styled.span`
 
 export const ImageContainer = styled.div`
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: center;
 	gap: 20px;
 	flex: 1;
-	max-width: 600px;
+	max-width: 800px;
 
 	@media (max-width: 768px) {
 		max-width: 100%;
@@ -104,13 +104,14 @@ export const PlayerImage = styled.img`
 	max-width: 500px;
 	height: auto;
 	object-fit: contain;
+
 `;
 
 export const BeAProText = styled.div`
 	font-size: 4rem;
 	font-weight: 900;
 	color: #1F1F1F;
-	text-align: center;
+	text-align: left;
 	line-height: 0.9;
 	letter-spacing: -2px;
 

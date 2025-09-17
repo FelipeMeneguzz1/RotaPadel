@@ -1,8 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../components/Button";
+import { ButtonHome } from "../../components/ButtonHome";
 import { BannerCarousel } from "../../components/Carousel";
 import { Header } from "../../components/Header";
-import { BannerWrapper, Container, Content, Overlay } from "./styles";
+import {
+	BannerWrapper,
+	Container,
+	ContainerBottom,
+	ContainerTop,
+	Content,
+	Overlay,
+} from "./styles";
 
 export function Home() {
 	const navigate = useNavigate();
@@ -13,14 +20,20 @@ export function Home() {
 
 	return (
 		<Container>
-			<Header />
-			<BannerCarousel />
-			<BannerWrapper>
-				<Overlay />
-				<Content>
-					<Button onClick={handleNavigate}>CLIQUE AQUI</Button>
-				</Content>
-			</BannerWrapper>
+			<ContainerTop>
+				<Header />
+				<BannerCarousel />
+			</ContainerTop>
+			<ContainerBottom>
+				<BannerWrapper>
+					<Overlay />
+					<Content>
+						<ButtonHome type="button" onClick={handleNavigate}>
+							CLIQUE AQUI
+						</ButtonHome>
+					</Content>
+				</BannerWrapper>
+			</ContainerBottom>
 		</Container>
 	);
 }

@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "../../components/Header";
-import { FormInput } from "../../components/FormInput";
 import { Button } from "../../components/Button";
+import { FormInput } from "../../components/FormInput";
+import { Header } from "../../components/Header";
 import { Link } from "../../components/Link";
 import authService from "../../services/authService";
 import {
-	Container,
-	FormContainer,
-	ModalContainer,
-	FormTitle,
-	FormSubtitle,
-	Form,
-	FormGroup,
-	SignInLink,
-	ErrorMessage,
-	PasswordRequirements,
-	ImageContainer,
-	PlayerImage,
 	BeAProText,
+	Container,
+	ErrorMessage,
+	Form,
+	FormContainer,
+	FormGroup,
+	FormSubtitle,
+	FormTitle,
+	ImageContainer,
+	ModalContainer,
+	PasswordRequirements,
+	PlayerImage,
+	SignInLink,
 } from "./styles";
 
 export function Register() {
@@ -37,13 +37,13 @@ export function Register() {
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			[name]: value,
 		}));
 		// Limpar erros quando usuário começar a digitar
 		if (errors[name]) {
-			setErrors(prev => ({
+			setErrors((prev) => ({
 				...prev,
 				[name]: "",
 			}));
@@ -95,24 +95,28 @@ export function Register() {
 	};
 
 	const formatPhone = (value) => {
-		const numbers = value.replace(/\D/g, '');
+		const numbers = value.replace(/\D/g, "");
 		if (numbers.length <= 2) return numbers;
-		if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-		if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+		if (numbers.length <= 6)
+			return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+		if (numbers.length <= 10)
+			return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
 		return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
 	};
 
 	const formatCPF = (value) => {
-		const numbers = value.replace(/\D/g, '');
+		const numbers = value.replace(/\D/g, "");
 		if (numbers.length <= 3) return numbers;
-		if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
-		if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+		if (numbers.length <= 6)
+			return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+		if (numbers.length <= 9)
+			return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
 		return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
 	};
 
 	const handlePhoneChange = (e) => {
 		const formatted = formatPhone(e.target.value);
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			phone: formatted,
 		}));
@@ -120,7 +124,7 @@ export function Register() {
 
 	const handleCPFChange = (e) => {
 		const formatted = formatCPF(e.target.value);
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			cpf: formatted,
 		}));
@@ -128,18 +132,18 @@ export function Register() {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		
+
 		if (!validateForm()) {
 			return;
 		}
 
 		setIsLoading(true);
 		setApiError("");
-		
+
 		try {
 			const response = await authService.register(formData);
 			console.log("Cadastro realizado com sucesso:", response);
-			
+
 			// Redirecionar para a página de login após cadastro bem-sucedido
 			navigate("/login");
 		} catch (error) {
@@ -156,17 +160,15 @@ export function Register() {
 			<FormContainer>
 				<ModalContainer>
 					<FormTitle>CADASTRO</FormTitle>
-					<FormSubtitle>
-						Crie sua conta para começar a jogar
-					</FormSubtitle>
-					
+					<FormSubtitle>Crie sua conta para começar a jogar</FormSubtitle>
+
 					<Form onSubmit={handleSubmit}>
 						{apiError && (
 							<FormGroup>
 								<ErrorMessage>{apiError}</ErrorMessage>
 							</FormGroup>
 						)}
-						
+
 						<FormGroup>
 							<FormInput
 								type="email"
@@ -200,7 +202,9 @@ export function Register() {
 								onChange={handleInputChange}
 								error={errors.birthDate}
 							/>
-							{errors.birthDate && <ErrorMessage>{errors.birthDate}</ErrorMessage>}
+							{errors.birthDate && (
+								<ErrorMessage>{errors.birthDate}</ErrorMessage>
+							)}
 						</FormGroup>
 
 						<FormGroup>
@@ -224,7 +228,9 @@ export function Register() {
 								onChange={handleInputChange}
 								error={errors.password}
 							/>
-							{errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
+							{errors.password && (
+								<ErrorMessage>{errors.password}</ErrorMessage>
+							)}
 							<PasswordRequirements>
 								Senha deve ter pelo menos 6 caracteres
 							</PasswordRequirements>
@@ -239,14 +245,13 @@ export function Register() {
 								onChange={handleInputChange}
 								error={errors.confirmPassword}
 							/>
-							{errors.confirmPassword && <ErrorMessage>{errors.confirmPassword}</ErrorMessage>}
+							{errors.confirmPassword && (
+								<ErrorMessage>{errors.confirmPassword}</ErrorMessage>
+							)}
 						</FormGroup>
 
-						<Button 
-							type="submit" 
-							disabled={isLoading}
-						>
-							{isLoading ? "Cadastrando..." : "ENTRAR"}
+						<Button type="submit" disabled={isLoading}>
+							{isLoading ? "Cadastrando..." : "CADASTRAR"}
 						</Button>
 
 						<SignInLink>
@@ -256,12 +261,13 @@ export function Register() {
 				</ModalContainer>
 
 				<ImageContainer>
-					<PlayerImage 
-						src="/src/assets/jogadorTelaLoginRegister.png" 
-						alt="Jogador de Padel" 
+					<PlayerImage
+						src="/src/assets/jogadorTelaLoginRegister.png"
+						alt="Jogador de Padel"
 					/>
 					<BeAProText>
-						BE A<br />PRO
+						BE A<br />
+						PRO
 					</BeAProText>
 				</ImageContainer>
 			</FormContainer>
