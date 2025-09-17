@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled from "styled-components";
 
 export const HeaderContainer = styled.header`
   display: flex;
@@ -7,18 +7,22 @@ export const HeaderContainer = styled.header`
   padding: 15px 30px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`
+`;
 
-export const Logo = styled.img`
-  width: 200px;
-  height: 40px;
-`
+export const Logo = styled.h1`
+  color: #1F1F1F;
+  font-size: 36px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: normal;
+  cursor: default;
+`;
 
 export const NavButtons = styled.div`
   display: flex;
   gap: 15px;
   align-items: center;
-`
+`;
 
 export const ScheduleButton = styled.button`
   background: transparent;
@@ -32,7 +36,7 @@ export const ScheduleButton = styled.button`
   &:hover {
     color: #666;
   }
-`
+`;
 
 export const LoginButton = styled.button`
   background: #C1EE0F;
@@ -48,6 +52,4 @@ export const LoginButton = styled.button`
   &:hover {
     background: #95c555;
   }
-`
-
-
+`;

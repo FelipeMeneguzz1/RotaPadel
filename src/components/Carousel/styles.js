@@ -1,24 +1,30 @@
-import styled from "styled-components"
+import styled from "styled-components";
 
-export const CarrosselContainer = styled.div`
-  display: grid;
-  grid-auto-flow: column;
-  scroll-snap-type: x mandatory;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  width: 300px;
-  height: 200px;
-  border-radius: 12px;
-  scrollbar-width: none;
+export const Container = styled.div`
+  width: 100%;
+  padding: 20px;
+  
+`;
 
-  &::-webkit-scrollbar {
-    display: none;
+export const CarouselWrapper = styled.div`
+  margin-bottom: 30px;
+
+  .react-multi-carousel-dot--active button {
+    background: #0636D4 !important;
+    border-color: #0636D4 !important;
   }
-`
+`;
 
-export const CarrosselImage = styled.img`
-  width: 300px;
-  height: 200px;
-  object-fit: cover;
-  scroll-snap-align: start;
-`
+export const CarouselItem = styled.div`
+  display: flex;
+  justify-content: center; /* centraliza horizontalmente */
+  align-items: center;     /* centraliza verticalmente (se tiver altura fixa) */
+  padding: 20px;           /* opcional, cria um "respiro" ao redor */
+
+  img {
+    max-width: 80%;  /* controla o tamanho (diminui a largura) */
+    height: auto;
+    border-radius: 18px;
+    object-fit: cover;
+  }
+`;
