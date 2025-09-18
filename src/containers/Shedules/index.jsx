@@ -362,7 +362,7 @@ export function Shedules() {
         onClose={handleCloseModal}
         onConfirm={handleConfirmReserve}
         hora={modalHour}
-        courtName={modalCourt || "Quadra"}
+        courtName={courtId}
         status={modalStatus}
       />
     </Container>
