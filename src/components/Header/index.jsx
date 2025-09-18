@@ -64,6 +64,13 @@ export function Header() {
     navigate("/");
   };
 
+  const handleLogout = () => {
+    authService.logout();
+    setLoggedIn(false);
+    setShowMenu(false);
+    navigate("/");
+  };
+
   const handleCancelReservation = async (reservationId) => {
     try {
       const res = await fetch(`${API_BASE_URL}/reservations/${reservationId}`, {
@@ -98,6 +105,9 @@ export function Header() {
               }}
             >
               MENU
+            </LoginButton>
+            <LoginButton onClick={handleLogout} style={{ marginLeft: "10px" }}>
+              SAIR
             </LoginButton>
             {showMenu && (
               <ul

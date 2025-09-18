@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 import { Header } from "../../components/Header";
 import { FormInput } from "../../components/FormInput";
@@ -123,6 +124,7 @@ function getTodayDate() {
 }
 
 export function Shedules() {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
   const [availableHours, setAvailableHours] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -343,12 +345,48 @@ export function Shedules() {
               >
                 {renderButtons(noite)}
               </div>
+          {!userId && (
+            <div
+              style={{
+                marginTop: "24px",
+                padding: "16px",
+                background: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+              }}
+            >
+              <span style={{ color: "#495057" }}>
+                É necessário estar logado para reservar um horário.
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                style={{
+                  background: "#C1EE0F",
+                  border: "none",
+                  color: "#1F1F1F",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  padding: "10px 20px",
+                  borderRadius: "15px",
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                }}
+              >
+                Fazer login
+              </button>
+            </div>
+          )}
             </div>
           </Form>
         </ModalContainer>
         <ImageContainer>
           <PlayerImage
-            src="/src/assets/jogadorTelaLoginRegister.png"
+            src="/src/assets/LoginImg.png"
             alt="Jogador de Padel"
           />
           <BeAProText>
