@@ -4,7 +4,6 @@ import authService from "../../services/authService";
 import { Header } from "../../components/Header";
 import { FormInput } from "../../components/FormInput";
 import { getTodayDateString } from "../../utils/dateUtils";
-import { debugDateConversion } from "../../utils/dateDebug";
 import {
   Container,
   FormContainer,
@@ -214,22 +213,61 @@ export function Shedules() {
 
   const { manha, tarde, noite } = separarHorariosPorPeriodo(availableHours);
 
-  const buttonStyle = (reserved) => ({
-    padding: "8px 16px",
-    border: reserved ? "1px solid #ccc" : "2px solid #74ff00",
-    borderRadius: "6px",
-    backgroundColor: "#FFF",
-    color: reserved ? "#999" : "#1F1F1F",
-    cursor: reserved ? "not-allowed" : "pointer",
-    transition: "all 0.2s",
-    opacity: reserved ? 0.6 : 1,
-  });
+  // Função para verificar se um horário já passou
+  const isPastTime = (hour) => {
+    if (!selectedDate) return false;
+    
+    const now = new Date();
+    const selectedDateObj = new Date(selectedDate + 'T00:00:00'); // Forçar timezone local
+    
+    // Verificar se é o dia atual
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    selectedDateObj.setHours(0, 0, 0, 0);
+    
+    const isToday = selectedDateObj.getTime() === today.getTime();
+    const isPastDate = selectedDateObj.getTime() < today.getTime();
+    
+    // Se a data é anterior ao dia atual, todos os horários são considerados passados
+    if (isPastDate) return true;
+    
+    // Se não é hoje, não é passado (data futura)
+    if (!isToday) return false;
+    
+    // Verificar se o horário já passou (considerando minutos também)
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    // Se for o mesmo horário, verificar se já passou considerando os minutos
+    let isPast = false;
+    if (hour < currentHour) {
+      isPast = true;
+    } else if (hour === currentHour) {
+      // Se for o mesmo horário, considerar que já passou se já passou mais de 30 minutos
+      isPast = currentMinute > 30;
+    }
+    
+    return isPast;
+  };
+
+  const buttonStyle = (reserved, hour) => {
+    const isPast = isPastTime(hour);
+    const isDisabled = reserved || isPast;
+    
+    return {
+      padding: "8px 16px",
+      border: isDisabled ? "1px solid #ccc" : "2px solid #74ff00",
+      borderRadius: "6px",
+      backgroundColor: isDisabled ? "#f5f5f5" : "#FFF",
+      color: isDisabled ? "#999" : "#1F1F1F",
+      cursor: isDisabled ? "not-allowed" : "pointer",
+      transition: "all 0.2s",
+      opacity: isDisabled ? 0.6 : 1,
+    };
+  };
 
   const handleDateChange = (e) => {
-    const newDate = e.target.value;
-    console.log('Data selecionada no calendário:', newDate);
-    debugDateConversion(newDate);
-    setSelectedDate(newDate);
+    setSelectedDate(e.target.value);
   };
 
   const handleCourtChange = (e) => {
@@ -241,6 +279,23 @@ export function Shedules() {
 
   const handleOpenModal = (hora, reserved) => {
     if (reserved) return;
+    
+    const hour = parseInt(hora.split(":")[0], 10);
+    if (isPastTime(hour)) {
+      const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDateObj.setHours(0, 0, 0, 0);
+      
+      if (selectedDateObj.getTime() < today.getTime()) {
+        setModalStatus("Não é possível reservar horários em datas passadas.");
+      } else {
+        setModalStatus("Não é possível reservar horários que já passaram.");
+      }
+      setModalOpen(true);
+      return;
+    }
+    
     setModalHour(hora);
     setModalCourt(selectedCourt?.name || "Quadra");
     setModalOpen(true);
@@ -257,6 +312,22 @@ export function Shedules() {
     }
     if (!userId) {
       setModalStatus("Você precisa estar logado.");
+      return;
+    }
+    
+    // Validação adicional para horários passados
+    const hour = parseInt(modalHour.split(":")[0], 10);
+    if (isPastTime(hour)) {
+      const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDateObj.setHours(0, 0, 0, 0);
+      
+      if (selectedDateObj.getTime() < today.getTime()) {
+        setModalStatus("Não é possível reservar horários em datas passadas.");
+      } else {
+        setModalStatus("Não é possível reservar horários que já passaram.");
+      }
       return;
     }
     try {
@@ -293,20 +364,37 @@ export function Shedules() {
 
   const renderButtons = (slots) =>
     slots.length > 0 ? (
-      slots.map((slot) => (
-        <button
-          key={slot.startHour}
-          type="button" 
-          style={buttonStyle(slot.reserved)}
-          onClick={(e) => {
-            e.preventDefault();
-            handleOpenModal(`${slot.startHour}:00`, slot.reserved);
-          }}
-          disabled={slot.reserved}
-        >
-          {slot.startHour}:00
-        </button>
-      ))
+      slots.map((slot) => {
+        const isPast = isPastTime(slot.startHour);
+        const isDisabled = slot.reserved || isPast;
+        
+        let buttonText = `${slot.startHour}:00`;
+        let tooltipText = "Clique para reservar";
+        
+        if (slot.reserved) {
+          buttonText += " (Reservado)";
+          tooltipText = "Horário já reservado";
+        } else if (isPast) {
+          buttonText += " (Passou)";
+          tooltipText = "Horário já passou - não disponível";
+        }
+        
+        return (
+          <button
+            key={slot.startHour}
+            type="button" 
+            style={buttonStyle(slot.reserved, slot.startHour)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleOpenModal(`${slot.startHour}:00`, slot.reserved);
+            }}
+            disabled={isDisabled}
+            title={tooltipText}
+          >
+            {buttonText}
+          </button>
+        );
+      })
     ) : (
       <span style={{ color: "#999" }}>Nenhum horário disponível</span>
     );
@@ -344,6 +432,24 @@ export function Shedules() {
                 onChange={handleDateChange}
               />
             </FormGroup>
+            {selectedDate && (
+              <div style={{ 
+                marginTop: "20px", 
+                padding: "12px", 
+                backgroundColor: "#e7f3ff", 
+                border: "1px solid #b3d9ff", 
+                borderRadius: "8px",
+                fontSize: "0.9rem",
+                color: "#0066cc"
+              }}>
+                <strong>Legenda dos horários:</strong>
+                <ul style={{ margin: "8px 0 0 20px", padding: 0 }}>
+                  <li><span style={{ color: "#1F1F1F" }}>Verde</span> - Disponível para reserva</li>
+                  <li><span style={{ color: "#999" }}>Cinza (Reservado)</span> - Já ocupado por outro usuário</li>
+                  <li><span style={{ color: "#999" }}>Cinza (Passou)</span> - Horário já passou no dia atual</li>
+                </ul>
+              </div>
+            )}
             {selectedCourt && selectedDate && (
               <div style={{ marginTop: "20px" }}>
                 <strong style={{ color: "#1F1F1F" }}>Manhã</strong>

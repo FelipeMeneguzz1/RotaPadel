@@ -52,6 +52,8 @@ export const FormSubtitle = styled.p`
   margin-bottom: 40px;
   text-align: center;
   max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 export const Form = styled.form`
