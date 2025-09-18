@@ -11,6 +11,13 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
+export const Content = styled.div`
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ margin-left: 100px;
+`;
+
 export const FormContainer = styled.div`
 	display: flex;
 	align-items: center;
@@ -93,7 +100,7 @@ export const ImageContainer = styled.div`
 	align-items: center;
 	gap: 20px;
 	flex: 1;
-	max-width: 700px;
+	max-width: 1000px;
 
 	@media (max-width: 768px) {
 		max-width: 100%;
@@ -102,20 +109,7 @@ export const ImageContainer = styled.div`
 
 export const PlayerImage = styled.img`
 	width: 100%;
-	max-width: 500px;
+	max-width: 700px;
 	height: auto;
 	object-fit: contain;
-`;
-
-export const BeAProText = styled.div`
-	font-size: 4rem;
-	font-weight: 900;
-	color: #1F1F1F;
-	text-align: left;
-	line-height: 0.9;
-	letter-spacing: -2px;
-
-	@media (max-width: 768px) {
-		font-size: 3rem;
-	}
 `;

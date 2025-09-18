@@ -6,8 +6,8 @@ import { Header } from "../../components/Header";
 import { Link } from "../../components/Link";
 import authService from "../../services/authService";
 import {
-	BeAProText,
 	Container,
+	Content,
 	ErrorMessage,
 	Form,
 	FormContainer,
@@ -157,120 +157,118 @@ export function Register() {
 	return (
 		<Container>
 			<Header />
-			<FormContainer>
-				<ModalContainer>
-					<FormTitle>CADASTRO</FormTitle>
-					<FormSubtitle>Crie sua conta para começar a jogar</FormSubtitle>
+			<Content>
+				<FormContainer>
+					<ModalContainer>
+						<FormTitle>CADASTRO</FormTitle>
+						<FormSubtitle>Crie sua conta para começar a jogar</FormSubtitle>
 
-					<Form onSubmit={handleSubmit}>
-						{apiError && (
+						<Form onSubmit={handleSubmit}>
+							{apiError && (
+								<FormGroup>
+									<ErrorMessage>{apiError}</ErrorMessage>
+								</FormGroup>
+							)}
+
 							<FormGroup>
-								<ErrorMessage>{apiError}</ErrorMessage>
+								<FormInput
+									type="email"
+									name="email"
+									placeholder="Digite seu email"
+									value={formData.email}
+									onChange={handleInputChange}
+									error={errors.email}
+								/>
+								{errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
 							</FormGroup>
-						)}
 
-						<FormGroup>
-							<FormInput
-								type="email"
-								name="email"
-								placeholder="Digite seu email"
-								value={formData.email}
-								onChange={handleInputChange}
-								error={errors.email}
-							/>
-							{errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
-						</FormGroup>
+							<FormGroup>
+								<FormInput
+									type="text"
+									name="cpf"
+									placeholder="000.000.000-00"
+									value={formData.cpf}
+									onChange={handleCPFChange}
+									error={errors.cpf}
+								/>
+								{errors.cpf && <ErrorMessage>{errors.cpf}</ErrorMessage>}
+							</FormGroup>
 
-						<FormGroup>
-							<FormInput
-								type="text"
-								name="cpf"
-								placeholder="000.000.000-00"
-								value={formData.cpf}
-								onChange={handleCPFChange}
-								error={errors.cpf}
-							/>
-							{errors.cpf && <ErrorMessage>{errors.cpf}</ErrorMessage>}
-						</FormGroup>
+							<FormGroup>
+								<FormInput
+									type="date"
+									name="birthDate"
+									placeholder="Data de nascimento"
+									value={formData.birthDate}
+									onChange={handleInputChange}
+									error={errors.birthDate}
+								/>
+								{errors.birthDate && (
+									<ErrorMessage>{errors.birthDate}</ErrorMessage>
+								)}
+							</FormGroup>
 
-						<FormGroup>
-							<FormInput
-								type="date"
-								name="birthDate"
-								placeholder="Data de nascimento"
-								value={formData.birthDate}
-								onChange={handleInputChange}
-								error={errors.birthDate}
-							/>
-							{errors.birthDate && (
-								<ErrorMessage>{errors.birthDate}</ErrorMessage>
-							)}
-						</FormGroup>
+							<FormGroup>
+								<FormInput
+									type="text"
+									name="phone"
+									placeholder="(11) 99999-9999"
+									value={formData.phone}
+									onChange={handlePhoneChange}
+									error={errors.phone}
+								/>
+								{errors.phone && <ErrorMessage>{errors.phone}</ErrorMessage>}
+							</FormGroup>
 
-						<FormGroup>
-							<FormInput
-								type="text"
-								name="phone"
-								placeholder="(11) 99999-9999"
-								value={formData.phone}
-								onChange={handlePhoneChange}
-								error={errors.phone}
-							/>
-							{errors.phone && <ErrorMessage>{errors.phone}</ErrorMessage>}
-						</FormGroup>
+							<FormGroup>
+								<FormInput
+									type="password"
+									name="password"
+									placeholder="Digite sua senha"
+									value={formData.password}
+									onChange={handleInputChange}
+									error={errors.password}
+								/>
+								{errors.password && (
+									<ErrorMessage>{errors.password}</ErrorMessage>
+								)}
+								<PasswordRequirements>
+									Senha deve ter pelo menos 6 caracteres
+								</PasswordRequirements>
+							</FormGroup>
 
-						<FormGroup>
-							<FormInput
-								type="password"
-								name="password"
-								placeholder="Digite sua senha"
-								value={formData.password}
-								onChange={handleInputChange}
-								error={errors.password}
-							/>
-							{errors.password && (
-								<ErrorMessage>{errors.password}</ErrorMessage>
-							)}
-							<PasswordRequirements>
-								Senha deve ter pelo menos 6 caracteres
-							</PasswordRequirements>
-						</FormGroup>
+							<FormGroup>
+								<FormInput
+									type="password"
+									name="confirmPassword"
+									placeholder="Confirme sua senha"
+									value={formData.confirmPassword}
+									onChange={handleInputChange}
+									error={errors.confirmPassword}
+								/>
+								{errors.confirmPassword && (
+									<ErrorMessage>{errors.confirmPassword}</ErrorMessage>
+								)}
+							</FormGroup>
 
-						<FormGroup>
-							<FormInput
-								type="password"
-								name="confirmPassword"
-								placeholder="Confirme sua senha"
-								value={formData.confirmPassword}
-								onChange={handleInputChange}
-								error={errors.confirmPassword}
-							/>
-							{errors.confirmPassword && (
-								<ErrorMessage>{errors.confirmPassword}</ErrorMessage>
-							)}
-						</FormGroup>
+							<Button type="submit" disabled={isLoading}>
+								{isLoading ? "Cadastrando..." : "CADASTRAR"}
+							</Button>
 
-						<Button type="submit" disabled={isLoading}>
-							{isLoading ? "Cadastrando..." : "CADASTRAR"}
-						</Button>
+							<SignInLink>
+								Já tem uma conta? <Link href="/login">Entre aqui</Link>
+							</SignInLink>
+						</Form>
+					</ModalContainer>
 
-						<SignInLink>
-							Já tem uma conta? <Link href="/login">Entre aqui</Link>
-						</SignInLink>
-					</Form>
-				</ModalContainer>
-
-				<ImageContainer>
-					<PlayerImage
-						src="/src/assets/jogadorTelaLoginRegister.png"
-						alt="Jogador de Padel"
-					/>
-					<BeAProText>
-						BE A<br />
-						PRO
-					</BeAProText>
-				</ImageContainer>
-			</FormContainer>
+					<ImageContainer>
+						<PlayerImage
+							src="/src/assets/LoginImg.png"
+							alt="Jogador de Padel"
+						/>
+					</ImageContainer>
+				</FormContainer>
+			</Content>
 		</Container>
 	);
 }

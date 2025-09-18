@@ -6,8 +6,8 @@ import { Header } from "../../components/Header";
 import { Link } from "../../components/Link";
 import authService from "../../services/authService";
 import {
-	BeAProText,
 	Container,
+	Content,
 	ErrorMessage,
 	ForgotPassword,
 	Form,
@@ -98,66 +98,67 @@ export function Login() {
 	return (
 		<Container>
 			<Header />
-			<FormContainer>
-				<ModalContainer>
-					<FormTitle>LOGIN</FormTitle>
-					<FormSubtitle>Entre com sua conta para continuar</FormSubtitle>
+			<Content>
+				<FormContainer>
+					<ModalContainer>
+						<FormTitle>LOGIN</FormTitle>
+						<FormSubtitle>Entre com sua conta para continuar</FormSubtitle>
 
-					<Form onSubmit={handleSubmit}>
-						{apiError && (
-							<FormGroup>
-								<ErrorMessage>{apiError}</ErrorMessage>
-							</FormGroup>
-						)}
-
-						<FormGroup>
-							<FormInput
-								type="email"
-								name="email"
-								placeholder="Digite seu email"
-								value={formData.email}
-								onChange={handleInputChange}
-								error={errors.email}
-							/>
-							{errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
-						</FormGroup>
-
-						<FormGroup>
-							<FormInput
-								type="password"
-								name="password"
-								placeholder="Digite sua senha"
-								value={formData.password}
-								onChange={handleInputChange}
-								error={errors.password}
-							/>
-							{errors.password && (
-								<ErrorMessage>{errors.password}</ErrorMessage>
+						<Form onSubmit={handleSubmit}>
+							{apiError && (
+								<FormGroup>
+									<ErrorMessage>{apiError}</ErrorMessage>
+								</FormGroup>
 							)}
-						</FormGroup>
 
-						<ForgotPassword>
-							<Link href="/forgot-password">Esqueci minha senha</Link>
-						</ForgotPassword>
+							<FormGroup>
+								<FormInput
+									type="email"
+									name="email"
+									placeholder="Digite seu email"
+									value={formData.email}
+									onChange={handleInputChange}
+									error={errors.email}
+								/>
+								{errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
+							</FormGroup>
 
-						<Button type="submit" disabled={isLoading}>
-							{isLoading ? "Entrando..." : "ENTRAR"}
-						</Button>
+							<FormGroup>
+								<FormInput
+									type="password"
+									name="password"
+									placeholder="Digite sua senha"
+									value={formData.password}
+									onChange={handleInputChange}
+									error={errors.password}
+								/>
+								{errors.password && (
+									<ErrorMessage>{errors.password}</ErrorMessage>
+								)}
+							</FormGroup>
 
-						<SignUpLink>
-							Não tem uma conta? <Link href="/register">Cadastre-se</Link>
-						</SignUpLink>
-					</Form>
-				</ModalContainer>
+							<ForgotPassword>
+								<Link href="/forgot-password">Esqueci minha senha</Link>
+							</ForgotPassword>
 
-				<ImageContainer>
-					<PlayerImage
-						src="/src/assets/jogadorTelaLoginRegister.png"
-						alt="Jogador de Padel"
-					/>
-					<BeAProText>BE A PRO</BeAProText>
-				</ImageContainer>
-			</FormContainer>
+							<Button type="submit" disabled={isLoading}>
+								{isLoading ? "Entrando..." : "ENTRAR"}
+							</Button>
+
+							<SignUpLink>
+								Não tem uma conta? <Link href="/register">Cadastre-se</Link>
+							</SignUpLink>
+						</Form>
+					</ModalContainer>
+
+					<ImageContainer>
+						<PlayerImage
+							src="/src/assets/LoginImg.png"
+							alt="Jogador de Padel"
+						/>
+					</ImageContainer>
+				</FormContainer>
+			</Content>
 		</Container>
 	);
 }
