@@ -226,7 +226,12 @@ export function Shedules() {
     selectedDateObj.setHours(0, 0, 0, 0);
     
     const isToday = selectedDateObj.getTime() === today.getTime();
+    const isPastDate = selectedDateObj.getTime() < today.getTime();
     
+    // Se a data é anterior ao dia atual, todos os horários são considerados passados
+    if (isPastDate) return true;
+    
+    // Se não é hoje, não é passado (data futura)
     if (!isToday) return false;
     
     // Verificar se o horário já passou (considerando minutos também)
@@ -241,19 +246,6 @@ export function Shedules() {
       // Se for o mesmo horário, considerar que já passou se já passou mais de 30 minutos
       isPast = currentMinute > 30;
     }
-    
-    // Debug log
-    console.log('Debug isPastTime:', {
-      hour,
-      currentHour,
-      currentMinute,
-      isToday,
-      isPast,
-      selectedDate,
-      now: now.toISOString(),
-      selectedDateObj: selectedDateObj.toISOString(),
-      today: today.toISOString()
-    });
     
     return isPast;
   };
@@ -290,7 +282,16 @@ export function Shedules() {
     
     const hour = parseInt(hora.split(":")[0], 10);
     if (isPastTime(hour)) {
-      setModalStatus("Não é possível reservar horários que já passaram.");
+      const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDateObj.setHours(0, 0, 0, 0);
+      
+      if (selectedDateObj.getTime() < today.getTime()) {
+        setModalStatus("Não é possível reservar horários em datas passadas.");
+      } else {
+        setModalStatus("Não é possível reservar horários que já passaram.");
+      }
       setModalOpen(true);
       return;
     }
@@ -317,7 +318,16 @@ export function Shedules() {
     // Validação adicional para horários passados
     const hour = parseInt(modalHour.split(":")[0], 10);
     if (isPastTime(hour)) {
-      setModalStatus("Não é possível reservar horários que já passaram.");
+      const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDateObj.setHours(0, 0, 0, 0);
+      
+      if (selectedDateObj.getTime() < today.getTime()) {
+        setModalStatus("Não é possível reservar horários em datas passadas.");
+      } else {
+        setModalStatus("Não é possível reservar horários que já passaram.");
+      }
       return;
     }
     try {
@@ -438,11 +448,6 @@ export function Shedules() {
                   <li><span style={{ color: "#999" }}>Cinza (Reservado)</span> - Já ocupado por outro usuário</li>
                   <li><span style={{ color: "#999" }}>Cinza (Passou)</span> - Horário já passou no dia atual</li>
                 </ul>
-                <div style={{ marginTop: "8px", fontSize: "0.8rem" }}>
-                  <strong>Debug:</strong> Hora atual: {new Date().getHours()}:{new Date().getMinutes().toString().padStart(2, '0')} | 
-                  Data selecionada: {selectedDate} | 
-                  É hoje: {new Date(selectedDate + 'T00:00:00').toDateString() === new Date().toDateString() ? 'Sim' : 'Não'}
-                </div>
               </div>
             )}
             {selectedCourt && selectedDate && (
