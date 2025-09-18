@@ -11,6 +11,8 @@ import {
   FormSubtitle,
   Form,
   FormGroup,
+  Select,
+  Label,
   ImageContainer,
   PlayerImage,
   BeAProText,
@@ -126,12 +128,13 @@ function getTodayDate() {
 export function Shedules() {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
+  const [selectedCourt, setSelectedCourt] = useState(null);
+  const [courts, setCourts] = useState([]);
   const [availableHours, setAvailableHours] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalHour, setModalHour] = useState("");
   const [modalCourt, setModalCourt] = useState("");
-  const [modalStatus, setModalStatus] = useState(""); 
-  const courtId = 1;
+  const [modalStatus, setModalStatus] = useState("");
 
   function getUserIdFromToken() {
     const token = authService.getToken();
@@ -146,14 +149,30 @@ export function Shedules() {
 
   const userId = getUserIdFromToken();
 
+  const fetchCourts = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courts`, {
+        headers: {
+          Authorization: `Bearer ${authService.getToken()}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCourts(data);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar quadras:", err);
+    }
+  };
+
   const fetchAvailableHours = async () => {
-    if (!selectedDate) {
+    if (!selectedDate || !selectedCourt) {
       setAvailableHours([]);
       return;
     }
     try {
       const res = await fetch(
-        `${API_BASE_URL}/schedule/${courtId}/${selectedDate}`,
+        `${API_BASE_URL}/schedule/${selectedCourt.id}/${selectedDate}`,
         {
           headers: {
             Authorization: `Bearer ${authService.getToken()}`,
@@ -172,8 +191,12 @@ export function Shedules() {
   };
 
   useEffect(() => {
+    fetchCourts();
+  }, []);
+
+  useEffect(() => {
     fetchAvailableHours();
-  }, [selectedDate, courtId]);
+  }, [selectedDate, selectedCourt]);
 
   function separarHorariosPorPeriodo(slots) {
     const manha = [];
@@ -209,16 +232,27 @@ export function Shedules() {
     setSelectedDate(e.target.value);
   };
 
-  const handleOpenModal = (hora, courtName, reserved) => {
+  const handleCourtChange = (e) => {
+    const courtId = parseInt(e.target.value);
+    const court = courts.find(c => c.id === courtId);
+    setSelectedCourt(court);
+    setAvailableHours([]); // Limpar horários quando trocar de quadra
+  };
+
+  const handleOpenModal = (hora, reserved) => {
     if (reserved) return;
     setModalHour(hora);
-    setModalCourt(courtName);
+    setModalCourt(selectedCourt?.name || "Quadra");
     setModalOpen(true);
   };
 
   const handleConfirmReserve = async () => {
     if (!selectedDate) {
       setModalStatus("Selecione uma data.");
+      return;
+    }
+    if (!selectedCourt) {
+      setModalStatus("Selecione uma quadra.");
       return;
     }
     if (!userId) {
@@ -234,7 +268,7 @@ export function Shedules() {
         },
         body: JSON.stringify({
           userId,
-          courtId,
+          courtId: selectedCourt.id,
           date: selectedDate,
           startHour: parseInt(modalHour.split(":")[0], 10),
         }),
@@ -266,7 +300,7 @@ export function Shedules() {
           style={buttonStyle(slot.reserved)}
           onClick={(e) => {
             e.preventDefault();
-            handleOpenModal(`${slot.startHour}:00`, slot.court_name, slot.reserved);
+            handleOpenModal(`${slot.startHour}:00`, slot.reserved);
           }}
           disabled={slot.reserved}
         >
@@ -284,10 +318,25 @@ export function Shedules() {
         <ModalContainer>
           <FormTitle>Agendamento</FormTitle>
           <FormSubtitle>
-            Escolha uma data e selecione o horário desejado
+            Escolha uma quadra, data e selecione o horário desejado
           </FormSubtitle>
           <Form>
             <FormGroup>
+              <Label>Quadra</Label>
+              <Select
+                value={selectedCourt?.id || ""}
+                onChange={handleCourtChange}
+              >
+                <option value="">Selecione uma quadra</option>
+                {courts.map((court) => (
+                  <option key={court.id} value={court.id}>
+                    {court.name} - {court.location}
+                  </option>
+                ))}
+              </Select>
+            </FormGroup>
+            <FormGroup>
+              <Label>Data</Label>
               <FormInput
                 type="date"
                 name="date"
@@ -295,8 +344,9 @@ export function Shedules() {
                 onChange={handleDateChange}
               />
             </FormGroup>
-            <div style={{ marginTop: "20px" }}>
-              <strong style={{ color: "#1F1F1F" }}>Manhã</strong>
+            {selectedCourt && selectedDate && (
+              <div style={{ marginTop: "20px" }}>
+                <strong style={{ color: "#1F1F1F" }}>Manhã</strong>
               <div
                 style={{
                   display: "flex",
@@ -345,6 +395,8 @@ export function Shedules() {
               >
                 {renderButtons(noite)}
               </div>
+              </div>
+            )}
           {!userId && (
             <div
               style={{
@@ -381,7 +433,6 @@ export function Shedules() {
               </button>
             </div>
           )}
-            </div>
           </Form>
         </ModalContainer>
         <ImageContainer>
@@ -389,10 +440,7 @@ export function Shedules() {
             src="/src/assets/LoginImg.png"
             alt="Jogador de Padel"
           />
-          <BeAProText>
-            BE A
-            <br />PRO
-          </BeAProText>
+          
         </ImageContainer>
       </FormContainer>
       <ConfirmModal
@@ -400,7 +448,7 @@ export function Shedules() {
         onClose={handleCloseModal}
         onConfirm={handleConfirmReserve}
         hora={modalHour}
-        courtName={courtId}
+        courtName={modalCourt}
         status={modalStatus}
       />
     </Container>

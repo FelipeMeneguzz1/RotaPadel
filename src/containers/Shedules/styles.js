@@ -67,6 +67,37 @@ export const FormGroup = styled.div`
   gap: 8px;
 `;
 
+export const Select = styled.select`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #fff;
+  transition: border-color 0.2s;
+  
+  &:focus {
+    outline: none;
+    border-color: #74ff00;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 14px;
+  }
+`;
+
+export const Label = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1F1F1F;
+  
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
+
 export const DaySection = styled.div`
   margin-top: 16px;
 `;
