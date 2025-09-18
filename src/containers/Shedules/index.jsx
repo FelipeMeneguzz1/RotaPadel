@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 import { Header } from "../../components/Header";
 import { FormInput } from "../../components/FormInput";
+import { getTodayDateString } from "../../utils/dateUtils";
+import { debugDateConversion } from "../../utils/dateDebug";
 import {
   Container,
   FormContainer,
@@ -120,14 +122,9 @@ function ConfirmModal({ open, onClose, onConfirm, hora, courtName, status }) {
 
 const API_BASE_URL = "http://localhost:4000/api";
 
-function getTodayDate() {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-}
-
 export function Shedules() {
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(getTodayDate());
+  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   const [selectedCourt, setSelectedCourt] = useState(null);
   const [courts, setCourts] = useState([]);
   const [availableHours, setAvailableHours] = useState([]);
@@ -229,7 +226,10 @@ export function Shedules() {
   });
 
   const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
+    const newDate = e.target.value;
+    console.log('Data selecionada no calendário:', newDate);
+    debugDateConversion(newDate);
+    setSelectedDate(newDate);
   };
 
   const handleCourtChange = (e) => {

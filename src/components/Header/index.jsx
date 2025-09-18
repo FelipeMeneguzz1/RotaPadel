@@ -7,7 +7,8 @@ import {
   ScheduleButton,
 } from "./styles";
 import { useState, useEffect } from "react";
-import authService from "../../services/authService"; 
+import authService from "../../services/authService";
+import { formatDateBR } from "../../utils/dateUtils"; 
 
 const API_BASE_URL = "http://localhost:4000/api";
 
@@ -22,13 +23,6 @@ function getUserIdFromToken() {
   }
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-}
 
 export function Header() {
   const navigate = useNavigate();
@@ -62,6 +56,10 @@ export function Header() {
 
   const handleNaviHome = () => {
     navigate("/");
+  };
+
+  const handleNaviReservations = () => {
+    navigate("/minhas-reservas");
   };
 
   const handleLogout = () => {
@@ -98,6 +96,9 @@ export function Header() {
           <LoginButton onClick={handleNaviLogin}>ENTRAR</LoginButton>
         ) : (
           <div style={{ position: "relative", display: "inline-block" }}>
+            <LoginButton onClick={handleNaviReservations} style={{ marginRight: "10px" }}>
+              MINHAS RESERVAS
+            </LoginButton>
             <LoginButton
               onClick={() => {
                 setShowMenu(!showMenu);
@@ -155,7 +156,7 @@ export function Header() {
                     >
                       <div style={{ display: "flex", flexDirection: "column" }}>
                         <span style={{ fontWeight: "500", color: "#0d6efd" }}>
-                          {formatDate(r.date)}
+                          {formatDateBR(r.date)}
                         </span>
                         <span style={{ color: "#212529" }}>
                           {r.court_name} — {r.start_hour}:00 às {r.end_hour}:00

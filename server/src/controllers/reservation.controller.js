@@ -20,7 +20,10 @@ exports.createReservation = async (req, res) => {
       return res.status(400).json({ message: "Todos os campos são obrigatórios" });
     }
 
-    const reservationDate = new Date(date);
+    // Criar data local para evitar problemas de fuso horário
+    const [year, month, day] = date.split('-').map(Number);
+    const reservationDate = new Date(year, month - 1, day);
+    
     if (isNaN(reservationDate.getTime())) {
       return res.status(400).json({ message: "Data inválida" });
     }
@@ -80,18 +83,60 @@ exports.listReservations = async (req, res) => {
 exports.cancelReservation = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id; // ID do usuário autenticado
 
+    // Buscar a reserva primeiro para validações
+    const reservation = await sql`
+      SELECT r.*, c.name as court_name
+      FROM reservations r
+      JOIN courts c ON c.id = r.court_id
+      WHERE r.id = ${id}
+    `;
+
+    if (reservation.length === 0) {
+      return res.status(404).json({ message: "Reserva não encontrada" });
+    }
+
+    const reservationData = reservation[0];
+
+    // Validação 1: Verificar se o usuário é o dono da reserva
+    if (reservationData.user_id !== userId) {
+      return res.status(403).json({ 
+        message: "Você só pode cancelar suas próprias reservas" 
+      });
+    }
+
+    // Validação 2: Verificar se a reserva não é do passado
+    const now = new Date();
+    const reservationDateTime = new Date(reservationData.date);
+    reservationDateTime.setHours(reservationData.start_hour, 0, 0, 0);
+
+    if (reservationDateTime <= now) {
+      return res.status(400).json({ 
+        message: "Não é possível cancelar reservas que já passaram" 
+      });
+    }
+
+    // Validação 3: Verificar tempo mínimo para cancelamento (2 horas antes)
+    const twoHoursFromNow = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+    
+    if (reservationDateTime <= twoHoursFromNow) {
+      return res.status(400).json({ 
+        message: "Não é possível cancelar reservas com menos de 2 horas de antecedência" 
+      });
+    }
+
+    // Se passou em todas as validações, cancelar a reserva
     const deleted = await sql`
       DELETE FROM reservations
       WHERE id = ${id}
       RETURNING *
     `;
 
-    if (deleted.length === 0) {
-      return res.status(404).json({ message: "Reserva não encontrada" });
-    }
-
-    return res.json({ message: "Reserva cancelada com sucesso", reservation: deleted[0] });
+    return res.json({ 
+      message: "Reserva cancelada com sucesso", 
+      reservation: deleted[0] 
+    });
   } catch (err) {
     console.error("cancelReservation error:", err);
     return res.status(500).json({ message: "Erro interno", error: err.message });
@@ -102,7 +147,10 @@ exports.getSchedule = async (req, res) => {
   try {
     const { courtId, date } = req.params;
 
-    const scheduleDate = new Date(date);
+    // Criar data local para evitar problemas de fuso horário
+    const [year, month, day] = date.split('-').map(Number);
+    const scheduleDate = new Date(year, month - 1, day);
+    
     if (isNaN(scheduleDate.getTime())) {
       return res.status(400).json({ message: "Data inválida" });
     }
