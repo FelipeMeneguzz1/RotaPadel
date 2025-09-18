@@ -15,6 +15,106 @@ import {
   BeAProText,
 } from "./styles";
 
+function ConfirmModal({ open, onClose, onConfirm, hora, courtName, status }) {
+  if (!open) return null;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "rgba(0,0,0,0.3)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: "8px",
+          padding: "32px",
+          minWidth: "320px",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+          textAlign: "center",
+        }}
+      >
+        <h3>Confirmar reserva</h3>
+        <p>
+          Deseja reservar o horário <b>{hora}</b> na quadra <b>{courtName}</b>?
+        </p>
+        {status && (
+          <div
+            style={{
+              margin: "16px 0",
+              color: status === "success" ? "#198754" : "#dc3545",
+              fontWeight: "bold",
+            }}
+          >
+            {status === "success"
+              ? "Reserva criada com sucesso!"
+              : status}
+          </div>
+        )}
+        <div
+          style={{ marginTop: "24px", display: "flex", justifyContent: "center", gap: "16px" }}
+        >
+          {status === "success" ? (
+            <button
+              onClick={onClose}
+              style={{
+                background: "#0d6efd",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                padding: "8px 20px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Fechar
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onConfirm}
+                style={{
+                  background: "#0d6efd",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "8px 20px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Confirmar
+              </button>
+              <button
+                onClick={onClose}
+                style={{
+                  background: "#eee",
+                  color: "#333",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "8px 20px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Cancelar
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const API_BASE_URL = "http://localhost:4000/api";
 
 function getTodayDate() {
@@ -25,6 +125,10 @@ function getTodayDate() {
 export function Shedules() {
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
   const [availableHours, setAvailableHours] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalHour, setModalHour] = useState("");
+  const [modalCourt, setModalCourt] = useState("");
+  const [modalStatus, setModalStatus] = useState(""); 
   const courtId = 1;
 
   function getUserIdFromToken() {
@@ -40,31 +144,32 @@ export function Shedules() {
 
   const userId = getUserIdFromToken();
 
-  useEffect(() => {
-    async function fetchAvailableHours() {
-      if (!selectedDate) {
-        setAvailableHours([]);
-        return;
-      }
-      try {
-        const res = await fetch(
-          `${API_BASE_URL}/schedule/${courtId}/${selectedDate}`,
-          {
-            headers: {
-              Authorization: `Bearer ${authService.getToken()}`,
-            },
-          }
-        );
-        const data = await res.json();
-        if (res.ok && data.schedule) {
-          setAvailableHours(data.schedule);
-        } else {
-          setAvailableHours([]);
-        }
-      } catch {
-        setAvailableHours([]);
-      }
+  const fetchAvailableHours = async () => {
+    if (!selectedDate) {
+      setAvailableHours([]);
+      return;
     }
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/schedule/${courtId}/${selectedDate}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authService.getToken()}`,
+          },
+        }
+      );
+      const data = await res.json();
+      if (res.ok && data.schedule) {
+        setAvailableHours(data.schedule);
+      } else {
+        setAvailableHours([]);
+      }
+    } catch {
+      setAvailableHours([]);
+    }
+  };
+
+  useEffect(() => {
     fetchAvailableHours();
   }, [selectedDate, courtId]);
 
@@ -102,16 +207,22 @@ export function Shedules() {
     setSelectedDate(e.target.value);
   };
 
-  const handleReserve = async (hora) => {
+  const handleOpenModal = (hora, courtName, reserved) => {
+    if (reserved) return;
+    setModalHour(hora);
+    setModalCourt(courtName);
+    setModalOpen(true);
+  };
+
+  const handleConfirmReserve = async () => {
     if (!selectedDate) {
-      console.log("Selecione uma data.");
+      setModalStatus("Selecione uma data.");
       return;
     }
     if (!userId) {
-      console.log("Você precisa estar logado.");
+      setModalStatus("Você precisa estar logado.");
       return;
     }
-
     try {
       const res = await fetch(`${API_BASE_URL}/reservations`, {
         method: "POST",
@@ -123,20 +234,46 @@ export function Shedules() {
           userId,
           courtId,
           date: selectedDate,
-          startHour: parseInt(hora.split(":")[0], 10),
+          startHour: parseInt(modalHour.split(":")[0], 10),
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        console.log("Reserva criada com sucesso!");
+        setModalStatus("success");
       } else {
-        console.log(data.message || "Erro ao reservar.");
+        setModalStatus(data.message || "Erro ao reservar.");
       }
     } catch (err) {
-      console.log("Erro ao reservar.");
+      setModalStatus("Erro ao reservar.");
     }
   };
+
+  const handleCloseModal = async () => {
+    setModalOpen(false);
+    setModalStatus("");
+    await fetchAvailableHours(); 
+  };
+
+  const renderButtons = (slots) =>
+    slots.length > 0 ? (
+      slots.map((slot) => (
+        <button
+          key={slot.startHour}
+          type="button" 
+          style={buttonStyle(slot.reserved)}
+          onClick={(e) => {
+            e.preventDefault();
+            handleOpenModal(`${slot.startHour}:00`, slot.court_name, slot.reserved);
+          }}
+          disabled={slot.reserved}
+        >
+          {slot.startHour}:00
+        </button>
+      ))
+    ) : (
+      <span style={{ color: "#999" }}>Nenhum horário disponível</span>
+    );
 
   return (
     <Container>
@@ -166,20 +303,7 @@ export function Shedules() {
                   marginTop: "8px",
                 }}
               >
-                {manha.length > 0 ? (
-                  manha.map((slot) => (
-                    <button
-                      key={slot.startHour}
-                      style={buttonStyle(slot.reserved)}
-                      onClick={() => handleReserve(`${slot.startHour}:00`)}
-                      disabled={slot.reserved}
-                    >
-                      {slot.startHour}:00
-                    </button>
-                  ))
-                ) : (
-                  <span style={{ color: "#999" }}>Nenhum horário disponível</span>
-                )}
+                {renderButtons(manha)}
               </div>
               <strong
                 style={{
@@ -198,20 +322,7 @@ export function Shedules() {
                   marginTop: "8px",
                 }}
               >
-                {tarde.length > 0 ? (
-                  tarde.map((slot) => (
-                    <button
-                      key={slot.startHour}
-                      style={buttonStyle(slot.reserved)}
-                      onClick={() => handleReserve(`${slot.startHour}:00`)}
-                      disabled={slot.reserved}
-                    >
-                      {slot.startHour}:00
-                    </button>
-                  ))
-                ) : (
-                  <span style={{ color: "#999" }}>Nenhum horário disponível</span>
-                )}
+                {renderButtons(tarde)}
               </div>
               <strong
                 style={{
@@ -230,20 +341,7 @@ export function Shedules() {
                   marginTop: "8px",
                 }}
               >
-                {noite.length > 0 ? (
-                  noite.map((slot) => (
-                    <button
-                      key={slot.startHour}
-                      style={buttonStyle(slot.reserved)}
-                      onClick={() => handleReserve(`${slot.startHour}:00`)}
-                      disabled={slot.reserved}
-                    >
-                      {slot.startHour}:00
-                    </button>
-                  ))
-                ) : (
-                  <span style={{ color: "#999" }}>Nenhum horário disponível</span>
-                )}
+                {renderButtons(noite)}
               </div>
             </div>
           </Form>
@@ -259,6 +357,14 @@ export function Shedules() {
           </BeAProText>
         </ImageContainer>
       </FormContainer>
+      <ConfirmModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmReserve}
+        hora={modalHour}
+        courtName={modalCourt || "Quadra"}
+        status={modalStatus}
+      />
     </Container>
   );
 }
